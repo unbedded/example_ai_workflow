@@ -171,4 +171,8 @@ cython_debug/
 .pypirc
 
 ai_sw_workflow/
-./*_prompt.txt
+.prompt_*
+*_code.py
+*_pseudo.yaml
+*_test.py
+.vscode/
