@@ -1,0 +1,27 @@
+ 
+file_basename: fibonacci 
+
+target_name: Fibonacci
+
+requirements: |
+  - Implement method get(index) 
+  - Return Fibonacci number at the specified index.
+  - Validate that the index is positive and is an integer.  
+
+architecture: |
+  - Encapsulate functionality into class named Fibonacci.
+  - thread-safe is not required - single-threaded operation is sufficient.
+  - Accept an optional maximum index (max_index) during initialization to limit the range of Fibonacci numbers.
+  - Handle edge cases and invalid operations predictably.
+  - Use caching to store previously calculated Fibonacci numbers for performance optimization.
+
+# code_requirements: |
+#   - <list implmentation requirements here>
+
+test_enable: True
+test_requirements: |
+  - test edge cases and invalid operations
+  - Include import logging
+  
+# code_references: |
+#   - <list files to reference>  

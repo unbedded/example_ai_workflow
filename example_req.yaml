@@ -1,0 +1,24 @@
+ 
+base_fname: example 
+
+target_name: example
+
+requirements: |
+  - make a list of 10x random numbers [1 to 50] inclusive
+  - print out the fibonacci number for each item in list
+
+architecture: |
+  - Encapsulate functionality into a function named [TARGET_NAME]
+  - Include a main function to run the code
+
+code_requirements: |
+  - Include the following imports
+    - fibonacci.fibonacci_code import Fibonacci
+
+test_enable: False
+test_requirements: |
+  - None  
+
+code_references: |
+  - fibonacci/fibonacci_code.py
+

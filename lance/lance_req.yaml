@@ -1,0 +1,46 @@
+# Comment out any fields that are not needed 
+
+file_basename: lance
+
+target_name: clustring
+
+requirements: |
+  - Identify clusters (or blobs) of connected True values in a 2D grid
+  - Return a list of clusters, where each cluster is a list of (x, y) coordinates.
+  - a grid cell is the character value of '1' or '0' 
+  - a cluster/blob is a group of connected cells with a value of '1'
+  - Any two cells with a '1' that are vertically or horizontally adjacent are cluster connected. 
+  - Any two cells with a '1' that are diagonally adjacent are cluster connected. 
+  - FOR EXAMPLE: the following grid contains a single cluster because all cells connect on a diagonal. 
+      Grid = [['1', '0', '1'],['0', '1', '0'],['1', '0', '1']]
+      Has only on cluster = [[(0, 0), (0, 2), (1, 1), (2, 0), (2, 2)]]
+
+architecture: |
+  - Package code into a function named <target_name>
+  - Problem is similar to vision-based connected components analysis or spatial clustering.
+
+code_requirements: |
+  - Handle all edge cases and boundary conditions
+
+test_enable: True
+
+test_requirements: |
+  - Do not test for a malformed grid
+  - Do not use 'pytest.lazy_fixture'
+  - A checkerboard gride pattern shall be considered a single cluster
+  - when comparing cluster list of (x, y) coordinates the values can be any order
+  - Include a test with a 16x16 Identity Matrix grid, since blob is connected to its 8 neighbors 
+    there should be only one blob that contain the main diagonal.
+  - Do not test any grid w/ a row/col dimensions greater than 25 
+  - BE VERY CAREFUL when making test grids - any diagonal cells w/ '1' 
+     will be considered connected
+  - Use the following grid and expected return result for testing 'Multiple Clusters'
+    ```
+    grid = ([['1', '0', '0', '1'],
+      ['0', '1', '0', '0'],
+      ['1', '0', '1', '1'],
+      ['0', '0', '0', '1']],
+     result = [[(0, 0), (1, 1), (2, 0), (2, 2), (2, 3), (3, 3)], [(0, 3)]]),
+  
+# code_references: |
+# - <list files to reference>  

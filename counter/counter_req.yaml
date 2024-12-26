@@ -1,7 +1,7 @@
  
 file_basename: counter 
 
-class_name: SafeCounter
+target_name: SafeCounter
 
 requirements: |
   - Write requirements for methods that increment, decrement, and retrieve a counter value. 
@@ -11,3 +11,13 @@ architecture: |
   - Encapsulate functionality into a thread-safe class.
   - Minimize performance impact under high concurrency.
   - Handle edge cases and invalid operations predictably.
+
+# code_requirements: |
+#   - <list implmentation requirements here>
+
+test_enable: True
+test_requirements: |
+  - test edge cases and invalid operations
+
+# code_references: |
+#   - <list files to reference>  
