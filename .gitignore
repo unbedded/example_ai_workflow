@@ -176,3 +176,5 @@ ai_sw_workflow/
 *_pseudo.yaml
 *_test.py
 .vscode/
+test_suite_analysis/
+managed_context/
