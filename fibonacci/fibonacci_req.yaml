@@ -1,6 +1,4 @@
  
-file_basename: fibonacci 
-
 target_name: Fibonacci
 
 requirements: |
@@ -9,7 +7,7 @@ requirements: |
   - Validate that the index is positive and is an integer.  
 
 architecture: |
-  - Encapsulate functionality into class named Fibonacci.
+  - Encapsulate functionality into class named [TARGET_NAME].
   - thread-safe is not required - single-threaded operation is sufficient.
   - Accept an optional maximum index (max_index) during initialization to limit the range of Fibonacci numbers.
   - Handle edge cases and invalid operations predictably.

@@ -1,6 +1,4 @@
  
-file_basename: counter 
-
 target_name: SafeCounter
 
 requirements: |
@@ -8,7 +6,7 @@ requirements: |
   - Initialize Counter to zero and value is always non-negative
 
 architecture: |
-  - Encapsulate functionality into a thread-safe class.
+  - Encapsulate functionality into a thread-safe class named [TARGET_NAME].
   - Minimize performance impact under high concurrency.
   - Handle edge cases and invalid operations predictably.
 
@@ -17,6 +15,7 @@ architecture: |
 
 test_enable: True
 test_requirements: |
+  - import logging
   - test edge cases and invalid operations
 
 # code_references: |
