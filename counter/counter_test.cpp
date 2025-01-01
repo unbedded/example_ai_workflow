@@ -1,23 +1,24 @@
-// TOKENS: 2061 (of:8000) = 1140 + 921(prompt+return) -- MODEL: gpt-4o 
+// TOKENS: 2131 (of:8000) = 1014 + 1117(prompt+return) -- MODEL: gpt-4o 
 // policy: ./ai_sw_workflow/policy/policy_gtest.yaml 
 // code: counter/counter_code.cpp 
 // dest: counter/counter_test.cpp 
 // counter/counter_test.cpp
-// Unit tests for the SafeCounter class using Google Test framework.
-// This file tests the increment, decrement, and getValue methods, including edge cases and invalid operations.
-// It also tests the debug mode functionality.
+// Unit tests for the SafeCounter class
+// Date: 2023-10-05
+//
+// This file contains unit tests for the SafeCounter class, which provides
+// thread-safe operations to increment, decrement, and retrieve a counter value.
+// The tests cover normal operations, edge cases, and invalid operations.
 
 #include <gtest/gtest.h>
-#include "safe_counter.hpp"
-#include <limits>
-#include <stdexcept>
+#include "SafeCounter.hpp"
 
 class SafeCounterTest : public ::testing::Test {
 protected:
     SafeCounter counter;
 
     void SetUp() override {
-        counter.setDebugMode(false); // Ensure debug mode is off for consistent test output
+        counter.setDebug(false); // Disable debug output for tests
     }
 };
 
@@ -30,65 +31,104 @@ TEST_F(SafeCounterTest, IncrementIncreasesValue) {
     EXPECT_EQ(counter.getValue(), 1);
 }
 
+TEST_F(SafeCounterTest, MultipleIncrements) {
+    for (int i = 0; i < 5; ++i) {
+        counter.increment();
+    }
+    EXPECT_EQ(counter.getValue(), 5);
+}
+
 TEST_F(SafeCounterTest, DecrementDecreasesValue) {
     counter.increment();
     counter.decrement();
     EXPECT_EQ(counter.getValue(), 0);
 }
 
-TEST_F(SafeCounterTest, DecrementThrowsUnderflowErrorWhenZero) {
-    EXPECT_THROW(counter.decrement(), std::underflow_error);
+TEST_F(SafeCounterTest, DecrementDoesNotGoBelowZero) {
+    counter.decrement();
+    EXPECT_EQ(counter.getValue(), 0);
 }
 
-TEST_F(SafeCounterTest, IncrementThrowsOverflowErrorAtMaxValue) {
-    counter.setDebugMode(true); // Enable debug mode to observe debug messages
-    for (int i = 0; i < std::numeric_limits<int>::max(); ++i) {
+TEST_F(SafeCounterTest, MultipleDecrements) {
+    for (int i = 0; i < 3; ++i) {
         counter.increment();
     }
-    EXPECT_THROW(counter.increment(), std::overflow_error);
-}
-
-TEST_F(SafeCounterTest, DebugModeOutputsMessages) {
-    testing::internal::CaptureStderr();
-    counter.setDebugMode(true);
-    counter.increment();
-    std::string output = testing::internal::GetCapturedStderr();
-    EXPECT_NE(output.find("[DEBUG] Counter incremented to 1."), std::string::npos);
-}
-
-TEST_F(SafeCounterTest, DebugModeCanBeDisabled) {
-    testing::internal::CaptureStderr();
-    counter.setDebugMode(false);
-    counter.increment();
-    std::string output = testing::internal::GetCapturedStderr();
-    EXPECT_EQ(output, "");
-}
-
-class SafeCounterParameterizedTest : public SafeCounterTest, public ::testing::WithParamInterface<int> {};
-
-TEST_P(SafeCounterParameterizedTest, IncrementAndDecrementMultipleTimes) {
-    int times = GetParam();
-    for (int i = 0; i < times; ++i) {
-        counter.increment();
-    }
-    EXPECT_EQ(counter.getValue(), times);
-
-    for (int i = 0; i < times; ++i) {
+    for (int i = 0; i < 5; ++i) {
         counter.decrement();
     }
     EXPECT_EQ(counter.getValue(), 0);
 }
 
-INSTANTIATE_TEST_SUITE_P(
-    SafeCounterTests,
-    SafeCounterParameterizedTest,
-    ::testing::Values(1, 10, 100, 1000)
-);
-
-TEST_F(SafeCounterTest, IncrementAndDecrementBoundaryConditions) {
+TEST_F(SafeCounterTest, DebugModeOutput) {
+    testing::internal::CaptureStderr();
+    counter.setDebug(true);
     counter.increment();
-    EXPECT_EQ(counter.getValue(), 1);
-    counter.decrement();
-    EXPECT_EQ(counter.getValue(), 0);
-    EXPECT_THROW(counter.decrement(), std::underflow_error);
+    std::string output = testing::internal::GetCapturedStderr();
+    EXPECT_NE(output.find("[DEBUG] Incremented counter to 1"), std::string::npos);
+}
+
+TEST_F(SafeCounterTest, DebugModeToggle) {
+    testing::internal::CaptureStderr();
+    counter.setDebug(true);
+    counter.increment();
+    counter.setDebug(false);
+    counter.increment();
+    std::string output = testing::internal::GetCapturedStderr();
+    EXPECT_NE(output.find("[DEBUG] Incremented counter to 1"), std::string::npos);
+    EXPECT_EQ(output.find("[DEBUG] Incremented counter to 2"), std::string::npos);
+}
+
+TEST_F(SafeCounterTest, ConcurrentIncrement) {
+    const int num_threads = 10;
+    const int increments_per_thread = 1000;
+    std::vector<std::thread> threads;
+
+    for (int i = 0; i < num_threads; ++i) {
+        threads.emplace_back([&]() {
+            for (int j = 0; j < increments_per_thread; ++j) {
+                counter.increment();
+            }
+        });
+    }
+
+    for (auto& thread : threads) {
+        thread.join();
+    }
+
+    EXPECT_EQ(counter.getValue(), num_threads * increments_per_thread);
+}
+
+TEST_F(SafeCounterTest, ConcurrentDecrement) {
+    const int num_threads = 10;
+    const int increments_per_thread = 1000;
+    const int decrements_per_thread = 500;
+    std::vector<std::thread> threads;
+
+    for (int i = 0; i < num_threads; ++i) {
+        threads.emplace_back([&]() {
+            for (int j = 0; j < increments_per_thread; ++j) {
+                counter.increment();
+            }
+        });
+    }
+
+    for (auto& thread : threads) {
+        thread.join();
+    }
+
+    threads.clear();
+
+    for (int i = 0; i < num_threads; ++i) {
+        threads.emplace_back([&]() {
+            for (int j = 0; j < decrements_per_thread; ++j) {
+                counter.decrement();
+            }
+        });
+    }
+
+    for (auto& thread : threads) {
+        thread.join();
+    }
+
+    EXPECT_EQ(counter.getValue(), num_threads * (increments_per_thread - decrements_per_thread));
 }

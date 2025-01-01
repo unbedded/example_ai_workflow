@@ -1,60 +1,38 @@
-// TOKENS: 1068 (of:8000) = 421 + 647(prompt+return) -- MODEL: gpt-4o 
+// TOKENS: 979 (of:8000) = 469 + 510(prompt+return) -- MODEL: gpt-4o 
 // policy: ./ai_sw_workflow/policy/policy_c++20.yaml 
 // code: counter/counter_code.cpp 
 // dest: counter/counter_code.cpp 
-#ifndef SAFE_COUNTER_HPP
-#define SAFE_COUNTER_HPP
+// SafeCounter.hpp
+// Header file for the SafeCounter class
+// Date: 2023-10-05
 
+#pragma once
+
+#include <mutex>
 #include <iostream>
-#include <stdexcept>
-#include <string>
-
-/**
- * @file safe_counter.hpp
- * @brief Declaration of the SafeCounter class for managing a non-negative counter.
- * @date 2023-10-05
- */
 
 class SafeCounter {
 public:
-    /**
-     * @brief Constructs a new SafeCounter object initialized to zero.
-     */
+    // Constructor initializes the counter to zero
     SafeCounter();
 
-    /**
-     * @brief Increments the counter by one.
-     * @throws std::overflow_error if the counter exceeds the maximum allowed value.
-     */
+    // Increments the counter by one
     void increment();
 
-    /**
-     * @brief Decrements the counter by one.
-     * @throws std::underflow_error if the counter is already zero.
-     */
+    // Decrements the counter by one, ensuring it remains non-negative
     void decrement();
 
-    /**
-     * @brief Retrieves the current value of the counter.
-     * @return The current counter value.
-     */
+    // Retrieves the current value of the counter
     int getValue() const;
 
-    /**
-     * @brief Enables or disables debug mode.
-     * @param enable True to enable debug mode, false to disable.
-     */
-    void setDebugMode(bool enable);
+    // Enables or disables debug output
+    void setDebug(bool enable);
 
 private:
-    int counter; ///< The current value of the counter.
-    bool debug_enable; ///< Flag to control debug output.
+    mutable std::mutex mtx; // Mutex to ensure thread safety
+    int counter;            // Counter value
+    bool debug_enable;      // Debug flag
 
-    /**
-     * @brief Prints a debug message if debug mode is enabled.
-     * @param message The message to print.
-     */
+    // Prints debug information if debug is enabled
     void debugPrint(const std::string& message) const;
 };
-
-#endif // SAFE_COUNTER_HPP

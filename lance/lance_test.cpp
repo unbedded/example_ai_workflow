@@ -1,98 +1,106 @@
-// TOKENS: 2977 (of:8000) = 1765 + 1212(prompt+return) -- MODEL: gpt-4o 
+// TOKENS: 2917 (of:8000) = 1657 + 1260(prompt+return) -- MODEL: gpt-4o 
 // policy: ./ai_sw_workflow/policy/policy_gtest.yaml 
 // code: lance/lance_code.cpp 
 // dest: lance/lance_test.cpp 
-/**
- * @file lance_test.cpp
- * @brief Unit tests for clustering connected components in a 2D grid.
- * @date 2023-10-05
- */
+// File: lance/lance_test.cpp
+// Description: Unit tests for the Clustering class using Google Test framework.
+// Tests cover normal, edge, and error conditions for the findClusters function.
 
-#include "lance_code.hpp"
+#include "clustering.hpp"
 #include <gtest/gtest.h>
-#include <algorithm>
 
-// Helper function to compare clusters without considering order
-bool compareClusters(const std::vector<Cluster>& clusters1, const std::vector<Cluster>& clusters2) {
-    if (clusters1.size() != clusters2.size()) return false;
-    for (const auto& cluster : clusters1) {
-        if (std::find(clusters2.begin(), clusters2.end(), cluster) == clusters2.end()) {
-            return false;
-        }
-    }
-    return true;
-}
-
-class ClustringTest : public ::testing::Test {
+class ClusteringTest : public ::testing::Test {
 protected:
-    void SetUp() override {
-        // Setup code if needed
-    }
+    Clustering clustering;
 
-    void TearDown() override {
-        // Teardown code if needed
-    }
+    ClusteringTest() : clustering(false) {}
 };
 
-TEST_F(ClustringTest, SingleClusterDiagonal) {
+TEST_F(ClusteringTest, SingleClusterDiagonal) {
     Grid grid = {
         {'1', '0', '1'},
         {'0', '1', '0'},
         {'1', '0', '1'}
     };
-    std::vector<Cluster> expected = {{{0, 0}, {0, 2}, {1, 1}, {2, 0}, {2, 2}}};
-    auto result = clustring(grid);
-    EXPECT_TRUE(compareClusters(result, expected));
+    Clusters expected = {{{0, 0}, {0, 2}, {1, 1}, {2, 0}, {2, 2}}};
+    Clusters result = clustering.findClusters(grid);
+    EXPECT_EQ(result.size(), expected.size());
+    for (const auto& cluster : expected) {
+        EXPECT_NE(std::find(result.begin(), result.end(), cluster), result.end());
+    }
 }
 
-TEST_F(ClustringTest, MultipleClusters) {
-    Grid grid = {
-        {'1', '0', '0', '1'},
-        {'0', '1', '0', '0'},
-        {'1', '0', '1', '1'},
-        {'0', '0', '0', '1'}
-    };
-    std::vector<Cluster> expected = {{{0, 0}, {1, 1}, {2, 0}, {2, 2}, {2, 3}, {3, 3}}, {{0, 3}}};
-    auto result = clustring(grid);
-    EXPECT_TRUE(compareClusters(result, expected));
-}
-
-TEST_F(ClustringTest, CheckerboardPattern) {
+TEST_F(ClusteringTest, CheckerboardPattern) {
     Grid grid = {
         {'1', '0', '1', '0'},
         {'0', '1', '0', '1'},
         {'1', '0', '1', '0'},
         {'0', '1', '0', '1'}
     };
-    std::vector<Cluster> expected = {{{0, 0}, {0, 2}, {1, 1}, {1, 3}, {2, 0}, {2, 2}, {3, 1}, {3, 3}}};
-    auto result = clustring(grid);
-    EXPECT_TRUE(compareClusters(result, expected));
+    Clusters expected = {{{0, 0}, {0, 2}, {1, 1}, {1, 3}, {2, 0}, {2, 2}, {3, 1}, {3, 3}}};
+    Clusters result = clustering.findClusters(grid);
+    EXPECT_EQ(result.size(), expected.size());
+    for (const auto& cluster : expected) {
+        EXPECT_NE(std::find(result.begin(), result.end(), cluster), result.end());
+    }
 }
 
-TEST_F(ClustringTest, IdentityMatrix16x16) {
+TEST_F(ClusteringTest, MultipleClusters) {
+    Grid grid = {
+        {'1', '0', '0', '1'},
+        {'0', '1', '0', '0'},
+        {'1', '0', '1', '1'},
+        {'0', '0', '0', '1'}
+    };
+    Clusters expected = {{{0, 0}, {1, 1}, {2, 0}, {2, 2}, {2, 3}, {3, 3}}, {{0, 3}}};
+    Clusters result = clustering.findClusters(grid);
+    EXPECT_EQ(result.size(), expected.size());
+    for (const auto& cluster : expected) {
+        EXPECT_NE(std::find(result.begin(), result.end(), cluster), result.end());
+    }
+}
+
+TEST_F(ClusteringTest, IdentityMatrix16x16) {
     Grid grid(16, std::vector<char>(16, '0'));
     for (int i = 0; i < 16; ++i) {
         grid[i][i] = '1';
     }
-    std::vector<Cluster> expected = {{{0, 0}, {1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5}, {6, 6}, {7, 7}, {8, 8}, {9, 9}, {10, 10}, {11, 11}, {12, 12}, {13, 13}, {14, 14}, {15, 15}}};
-    auto result = clustring(grid);
-    EXPECT_TRUE(compareClusters(result, expected));
+    Clusters expected = {{{0, 0}, {1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5}, {6, 6}, {7, 7},
+                          {8, 8}, {9, 9}, {10, 10}, {11, 11}, {12, 12}, {13, 13}, {14, 14}, {15, 15}}};
+    Clusters result = clustering.findClusters(grid);
+    EXPECT_EQ(result.size(), expected.size());
+    for (const auto& cluster : expected) {
+        EXPECT_NE(std::find(result.begin(), result.end(), cluster), result.end());
+    }
 }
 
-TEST_F(ClustringTest, EmptyGrid) {
+TEST_F(ClusteringTest, EmptyGrid) {
     Grid grid = {};
-    std::vector<Cluster> expected = {};
-    auto result = clustring(grid);
-    EXPECT_TRUE(compareClusters(result, expected));
+    EXPECT_THROW(clustering.findClusters(grid), std::invalid_argument);
 }
 
-TEST_F(ClustringTest, NoClusters) {
+TEST_F(ClusteringTest, SingleCellCluster) {
+    Grid grid = {{'1'}};
+    Clusters expected = {{{0, 0}}};
+    Clusters result = clustering.findClusters(grid);
+    EXPECT_EQ(result.size(), expected.size());
+    for (const auto& cluster : expected) {
+        EXPECT_NE(std::find(result.begin(), result.end(), cluster), result.end());
+    }
+}
+
+TEST_F(ClusteringTest, NoClusters) {
     Grid grid = {
         {'0', '0', '0'},
         {'0', '0', '0'},
         {'0', '0', '0'}
     };
-    std::vector<Cluster> expected = {};
-    auto result = clustring(grid);
-    EXPECT_TRUE(compareClusters(result, expected));
+    Clusters expected = {};
+    Clusters result = clustering.findClusters(grid);
+    EXPECT_EQ(result.size(), expected.size());
+}
+
+int main(int argc, char **argv) {
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

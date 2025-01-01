@@ -1,75 +1,64 @@
-// TOKENS: 1671 (of:8000) = 685 + 986(prompt+return) -- MODEL: gpt-4o 
+// TOKENS: 1403 (of:8000) = 655 + 748(prompt+return) -- MODEL: gpt-4o 
 // policy: ./ai_sw_workflow/policy/policy_c++20.yaml 
 // code: lance/lance_code.cpp 
 // dest: lance/lance_code.cpp 
-/**
- * @file lance_code.cpp
- * @brief Implementation file for clustering connected components in a 2D grid.
- * @date 2023-10-05
- */
+#include "clustering.hpp"
+#include <stdexcept>
 
-#include "lance_code.hpp"
-#include <iostream>
+// File: clustering.cpp
+// Date: 2023-10-05
+// Description: Implementation file for clustering connected components in a 2D grid.
 
-namespace {
-    // Directions for moving in 8 possible directions (N, S, E, W, NE, NW, SE, SW)
-    const std::vector<Coordinate> directions = {
-        {-1, 0}, {1, 0}, {0, -1}, {0, 1}, // N, S, W, E
-        {-1, -1}, {-1, 1}, {1, -1}, {1, 1} // NW, NE, SW, SE
-    };
+Clustering::Clustering(bool debug_enable) : debug_enable_(debug_enable) {}
 
-    bool debug_enable = false;
-
-    void debug_print(const std::string& message) {
-        if (debug_enable) {
-            std::cerr << message << std::endl;
-        }
-    }
-
-    /**
-     * @brief Depth-first search to explore a cluster.
-     * 
-     * @param grid The 2D grid of characters.
-     * @param visited A 2D grid to track visited cells.
-     * @param x The current x-coordinate.
-     * @param y The current y-coordinate.
-     * @param cluster The current cluster being explored.
-     */
-    void dfs(const Grid& grid, std::vector<std::vector<bool>>& visited, int x, int y, Cluster& cluster) {
-        visited[x][y] = true;
-        cluster.emplace_back(x, y);
-        debug_print("Visiting: (" + std::to_string(x) + ", " + std::to_string(y) + ")");
-
-        for (const auto& [dx, dy] : directions) {
-            int nx = x + dx;
-            int ny = y + dy;
-            if (nx >= 0 && nx < grid.size() && ny >= 0 && ny < grid[0].size() && !visited[nx][ny] && grid[nx][ny] == '1') {
-                dfs(grid, visited, nx, ny, cluster);
-            }
-        }
-    }
-}
-
-std::vector<Cluster> clustring(const Grid& grid) {
-    std::vector<Cluster> clusters;
+Clusters Clustering::findClusters(const Grid& grid) {
     if (grid.empty() || grid[0].empty()) {
-        return clusters;
+        throw std::invalid_argument("Grid cannot be empty.");
     }
 
     int rows = grid.size();
     int cols = grid[0].size();
     std::vector<std::vector<bool>> visited(rows, std::vector<bool>(cols, false));
+    Clusters clusters;
 
-    for (int x = 0; x < rows; ++x) {
-        for (int y = 0; y < cols; ++y) {
-            if (grid[x][y] == '1' && !visited[x][y]) {
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            if (grid[i][j] == '1' && !visited[i][j]) {
                 Cluster cluster;
-                debug_print("Starting new cluster at: (" + std::to_string(x) + ", " + std::to_string(y) + ")");
-                dfs(grid, visited, x, y, cluster);
+                dfs(grid, i, j, cluster, visited);
                 clusters.push_back(cluster);
             }
         }
     }
 
     return clusters;
+}
+
+void Clustering::dfs(const Grid& grid, int x, int y, Cluster& cluster, std::vector<std::vector<bool>>& visited) {
+    static const std::vector<std::pair<int, int>> directions = {
+        {-1, -1}, {-1, 0}, {-1, 1},
+        {0, -1},          {0, 1},
+        {1, -1}, {1, 0}, {1, 1}
+    };
+
+    int rows = grid.size();
+    int cols = grid[0].size();
+
+    visited[x][y] = true;
+    cluster.emplace_back(x, y);
+
+    for (const auto& [dx, dy] : directions) {
+        int nx = x + dx;
+        int ny = y + dy;
+
+        if (nx >= 0 && nx < rows && ny >= 0 && ny < cols && grid[nx][ny] == '1' && !visited[nx][ny]) {
+            dfs(grid, nx, ny, cluster, visited);
+        }
+    }
+}
+
+void Clustering::debugPrint(const std::string& message) const {
+    if (debug_enable_) {
+        std::cerr << message << std::endl;
+    }
 }

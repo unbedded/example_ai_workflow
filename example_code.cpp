@@ -1,46 +1,56 @@
-// TOKENS: 1892 (of:8000) = 1214 + 678(prompt+return) -- MODEL: gpt-4o 
+// TOKENS: 1366 (of:8000) = 505 + 861(prompt+return) -- MODEL: gpt-4o 
 // policy: ./ai_sw_workflow/policy/policy_c++20.yaml 
 // code: example_code.cpp 
 // dest: example_code.cpp 
-/*
- * example.cpp
- * 
- * Implements the example function which generates random numbers and calculates their Fibonacci values.
- * 
- * Date: 2023-10-05
- */
+// example.cpp
+// Implementation file for the example module
+// Date: 2023-10-05
+// Implements functionality to generate random numbers and compute Fibonacci numbers.
 
 #include "example.hpp"
 
-// Function to generate a list of random numbers and calculate Fibonacci numbers
-void example() {
-    // Pirate slang for internal variables
-    std::vector<int> booty(10);
+std::vector<int> generate_random_numbers(int count, int min, int max) {
     std::random_device seadog;
     std::mt19937 capn(seadog());
-    std::uniform_int_distribution<int> treasure_map(1, 50);
+    std::uniform_int_distribution<int> treasure(min, max);
 
-    // Generate random numbers
-    for (auto& doubloon : booty) {
-        doubloon = treasure_map(capn);
+    std::vector<int> booty(count);
+    for (int& doubloon : booty) {
+        doubloon = treasure(capn);
     }
+    return booty;
+}
 
-    // Create a Fibonacci object with a maximum index of 50
-    Fibonacci fib(50);
+int compute_fibonacci(int n) {
+    if (n < 0) {
+        throw std::invalid_argument("Negative index for Fibonacci sequence");
+    }
+    if (n == 0) return 0;
+    if (n == 1) return 1;
 
-    // Calculate and print Fibonacci numbers for each random number
-    for (const auto& doubloon : booty) {
-        try {
-            int fib_value = fib.get(doubloon);
-            std::cout << "Fibonacci of " << doubloon << " is " << fib_value << std::endl;
-        } catch (const std::exception& e) {
-            std::cerr << "Error: " << e.what() << std::endl;
+    int prev = 0, curr = 1;
+    for (int i = 2; i <= n; ++i) {
+        int next = prev + curr;
+        prev = curr;
+        curr = next;
+    }
+    return curr;
+}
+
+void example(bool debug_enable) {
+    try {
+        auto booty = generate_random_numbers(10, 1, 50);
+        for (const int& doubloon : booty) {
+            int fib_number = compute_fibonacci(doubloon);
+            std::cout << "Fibonacci of " << doubloon << " is " << fib_number << std::endl;
+            debug_print("Computed Fibonacci for " + std::to_string(doubloon), debug_enable);
         }
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
     }
 }
 
-// Main function to execute the example
 int main() {
-    example();
+    example(true); // Enable debug mode
     return 0;
 }
