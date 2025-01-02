@@ -1,10 +1,17 @@
-// TOKENS: 979 (of:8000) = 469 + 510(prompt+return) -- MODEL: gpt-4o 
+// TOKENS: 1230 (of:8000) = 477 + 753(prompt+return) -- MODEL: gpt-4o 
 // policy: ./ai_sw_workflow/policy/policy_c++20.yaml 
 // code: counter/counter_code.cpp 
 // dest: counter/counter_code.cpp 
-// SafeCounter.hpp
-// Header file for the SafeCounter class
-// Date: 2023-10-05
+/**
+ * @file counter_code.hpp
+ * @brief Declaration of the SafeCounter class for thread-safe counter operations.
+ * @date 2023-10-05
+ *
+ * This header file declares the SafeCounter class, which provides a thread-safe
+ * mechanism to increment, decrement, and retrieve a counter value. The counter
+ * is initialized to zero and ensures that its value is always non-negative.
+ * The class is designed to minimize performance impact under high concurrency.
+ */
 
 #pragma once
 
@@ -13,26 +20,41 @@
 
 class SafeCounter {
 public:
-    // Constructor initializes the counter to zero
+    /**
+     * @brief Constructs a SafeCounter with an initial value of zero.
+     */
     SafeCounter();
 
-    // Increments the counter by one
+    /**
+     * @brief Increments the counter by one.
+     */
     void increment();
 
-    // Decrements the counter by one, ensuring it remains non-negative
+    /**
+     * @brief Decrements the counter by one, ensuring it does not go below zero.
+     */
     void decrement();
 
-    // Retrieves the current value of the counter
+    /**
+     * @brief Retrieves the current value of the counter.
+     * @return The current counter value.
+     */
     int getValue() const;
 
-    // Enables or disables debug output
+    /**
+     * @brief Enables or disables debug output.
+     * @param enable True to enable debug output, false to disable.
+     */
     void setDebug(bool enable);
 
 private:
-    mutable std::mutex mtx; // Mutex to ensure thread safety
-    int counter;            // Counter value
-    bool debug_enable;      // Debug flag
+    mutable std::mutex mtx_; ///< Mutex for synchronizing access to the counter.
+    int counter_; ///< The counter value, always non-negative.
+    bool debug_enable_; ///< Flag to control debug output.
 
-    // Prints debug information if debug is enabled
+    /**
+     * @brief Prints a debug message if debugging is enabled.
+     * @param message The message to print.
+     */
     void debugPrint(const std::string& message) const;
 };
