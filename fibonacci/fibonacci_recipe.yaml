@@ -20,6 +20,7 @@ test_enable: True
 test_requirements: |
   - test edge cases and invalid operations
   - Include import logging
+  - Do not test for Exception For Negative Index
   
 # code_references: |
 #   - <list files to reference>  

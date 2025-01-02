@@ -1,52 +1,75 @@
-// TOKENS: 1590 (of:8000) = 692 + 898(prompt+return) -- MODEL: gpt-4o 
+// TOKENS: 1969 (of:8000) = 770 + 1199(prompt+return) -- MODEL: gpt-4o 
 // policy: ./ai_sw_workflow/policy/policy_c++20.yaml 
 // code: lance/lance_code.cpp 
 // dest: lance/lance_code.cpp 
 /**
  * @file lance_code.cpp
- * @brief Implementation file for clustering connected components in a 2D grid.
+ * @brief Implementation of clustering algorithm to identify connected components in a 2D grid.
  * 
- * This file contains the implementation of functions to identify clusters of connected
- * '1's in a 2D grid using Depth-First Search (DFS).
+ * This file contains the implementation of the `clustering` function, which identifies clusters of connected '1's
+ * in a 2D grid. The function uses a depth-first search (DFS) approach to explore and identify connected components.
  * 
- * Date: 2023-10-05
+ * Date: 2025-01-02
  */
 
 #include "lance_code.hpp"
 #include <iostream>
+#include <stack>
 
-namespace {
-    // Directions for moving in 8 possible ways (vertical, horizontal, diagonal)
-    const std::vector<std::pair<int, int>> directions = {
+// Function to print debug information
+void debug_print(const std::string& message) {
+    if (debug_enable) {
+        std::cerr << message << std::endl;
+    }
+}
+
+// Check if a given cell (x, y) is within the grid boundaries and is a '1'
+bool is_valid(int x, int y, const std::vector<std::vector<char>>& grid, std::vector<std::vector<bool>>& visited) {
+    return (x >= 0 && x < grid.size() && y >= 0 && y < grid[0].size() && grid[x][y] == '1' && !visited[x][y]);
+}
+
+// Perform DFS to find all connected '1's starting from (x, y)
+void dfs(int x, int y, const std::vector<std::vector<char>>& grid, std::vector<std::vector<bool>>& visited, std::vector<std::pair<int, int>>& cluster) {
+    static const std::vector<std::pair<int, int>> directions = {
         {-1, -1}, {-1, 0}, {-1, 1},
-        {0, -1},         {0, 1},
+        {0, -1},          {0, 1},
         {1, -1}, {1, 0}, {1, 1}
     };
 
-    bool debug_enable = false;
+    std::stack<std::pair<int, int>> stack;
+    stack.push({x, y});
+    visited[x][y] = true;
 
-    void debug_print(const std::string& message) {
-        if (debug_enable) {
-            std::cerr << message << std::endl;
+    while (!stack.empty()) {
+        auto [cx, cy] = stack.top();
+        stack.pop();
+        cluster.push_back({cx, cy});
+
+        for (const auto& [dx, dy] : directions) {
+            int nx = cx + dx;
+            int ny = cy + dy;
+            if (is_valid(nx, ny, grid, visited)) {
+                visited[nx][ny] = true;
+                stack.push({nx, ny});
+            }
         }
     }
 }
 
-Clusters clustring(const Grid& grid) {
+// Main function to find clusters in the grid
+std::vector<std::vector<std::pair<int, int>>> clustering(const std::vector<std::vector<char>>& grid) {
+    std::vector<std::vector<std::pair<int, int>>> clusters;
     if (grid.empty() || grid[0].empty()) {
-        return {};
+        return clusters;
     }
 
-    int rows = grid.size();
-    int cols = grid[0].size();
-    std::vector<std::vector<bool>> visited(rows, std::vector<bool>(cols, false));
-    Clusters clusters;
+    std::vector<std::vector<bool>> visited(grid.size(), std::vector<bool>(grid[0].size(), false));
 
-    for (int i = 0; i < rows; ++i) {
-        for (int j = 0; j < cols; ++j) {
+    for (int i = 0; i < grid.size(); ++i) {
+        for (int j = 0; j < grid[0].size(); ++j) {
             if (grid[i][j] == '1' && !visited[i][j]) {
-                Cluster cluster;
-                dfs(grid, i, j, visited, cluster);
+                std::vector<std::pair<int, int>> cluster;
+                dfs(i, j, grid, visited, cluster);
                 clusters.push_back(cluster);
             }
         }
@@ -55,19 +78,24 @@ Clusters clustring(const Grid& grid) {
     return clusters;
 }
 
-void dfs(const Grid& grid, int x, int y, std::vector<std::vector<bool>>& visited, Cluster& cluster) {
-    int rows = grid.size();
-    int cols = grid[0].size();
+// Uncomment the following main function to test the clustering function
+/*
+int main() {
+    std::vector<std::vector<char>> grid = {
+        {'1', '0', '1'},
+        {'0', '1', '0'},
+        {'1', '0', '1'}
+    };
 
-    visited[x][y] = true;
-    cluster.emplace_back(x, y);
-
-    for (const auto& [dx, dy] : directions) {
-        int nx = x + dx;
-        int ny = y + dy;
-
-        if (nx >= 0 && nx < rows && ny >= 0 && ny < cols && grid[nx][ny] == '1' && !visited[nx][ny]) {
-            dfs(grid, nx, ny, visited, cluster);
+    auto clusters = clustering(grid);
+    for (const auto& cluster : clusters) {
+        std::cout << "Cluster: ";
+        for (const auto& [x, y] : cluster) {
+            std::cout << "(" << x << ", " << y << ") ";
         }
+        std::cout << std::endl;
     }
+
+    return 0;
 }
+*/

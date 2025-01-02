@@ -1,46 +1,20 @@
-// TOKENS: 1417 (of:8000) = 514 + 903(prompt+return) -- MODEL: gpt-4o 
+// TOKENS: 1394 (of:8000) = 590 + 804(prompt+return) -- MODEL: gpt-4o 
 // policy: ./ai_sw_workflow/policy/policy_c++20.yaml 
 // code: example_code.cpp 
 // dest: example_code.cpp 
 /**
  * @file example_code.hpp
- * @brief Header file for generating random numbers and calculating Fibonacci numbers.
- * @date 2023-10-05
+ * @brief Declaration of the example function.
+ * @date 2025-01-02
  *
- * This file contains the declarations for generating a list of random numbers
- * and calculating their corresponding Fibonacci numbers using modern C++20 standards.
+ * This header file contains the declaration of the example function which generates a list of random numbers
+ * and computes the Fibonacci number for each.
  */
 
-#pragma once
+#ifndef EXAMPLE_CODE_HPP
+#define EXAMPLE_CODE_HPP
 
-#include <vector>
-#include <iostream>
-#include <random>
-#include <stdexcept>
+// Function declaration
+void example(bool debug_enable = false);
 
-// Function to calculate Fibonacci number
-inline int fibonacci(int n) {
-    if (n <= 0) return 0;
-    if (n == 1) return 1;
-    int a = 0, b = 1, c;
-    for (int i = 2; i <= n; ++i) {
-        c = a + b;
-        a = b;
-        b = c;
-    }
-    return b;
-}
-
-// Function to generate a list of random numbers
-std::vector<int> generate_random_numbers(int count, int min, int max);
-
-// Main example function
-void example();
-
-// Debugging utility
-extern bool debug_enable;
-inline void debug_print(const std::string& message) {
-    if (debug_enable) {
-        std::cerr << message << std::endl;
-    }
-}
+#endif // EXAMPLE_CODE_HPP

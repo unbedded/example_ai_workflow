@@ -1,52 +1,74 @@
-// TOKENS: 1230 (of:8000) = 477 + 753(prompt+return) -- MODEL: gpt-4o 
+// TOKENS: 1469 (of:8000) = 554 + 915(prompt+return) -- MODEL: gpt-4o 
 // policy: ./ai_sw_workflow/policy/policy_c++20.yaml 
 // code: counter/counter_code.cpp 
 // dest: counter/counter_code.cpp 
 /**
  * @file counter_code.cpp
- * @brief Implementation of the SafeCounter class for thread-safe counter operations.
- * @date 2023-10-05
- *
- * This source file implements the SafeCounter class, providing thread-safe
- * operations to increment, decrement, and retrieve a counter value. The counter
- * is initialized to zero and ensures that its value is always non-negative.
- * The class is designed to minimize performance impact under high concurrency.
+ * @brief Implementation of the SafeCounter class.
+ * 
+ * This file contains the implementation of the SafeCounter class, which provides
+ * a thread-safe mechanism to increment, decrement, and retrieve a counter value.
+ * The counter is initialized to zero and is always non-negative.
+ * 
+ * Date: 2025-01-02
  */
 
 #include "counter_code.hpp"
+#include <iostream>
+#include <stdexcept>
 
-SafeCounter::SafeCounter() : counter_(0), debug_enable_(false) {}
+SafeCounter::SafeCounter() : counter(0), debug_enable(false) {}
 
 void SafeCounter::increment() {
-    std::lock_guard<std::mutex> lock(mtx_);
-    ++counter_;
-    debugPrint("Counter incremented to " + std::to_string(counter_));
+    std::lock_guard<std::mutex> lock(mutex);
+    ++counter;
+    if (debug_enable) {
+        std::cerr << "Counter incremented to: " << counter << std::endl;
+    }
 }
 
 void SafeCounter::decrement() {
-    std::lock_guard<std::mutex> lock(mtx_);
-    if (counter_ > 0) {
-        --counter_;
-        debugPrint("Counter decremented to " + std::to_string(counter_));
-    } else {
-        debugPrint("Attempted to decrement counter below zero");
+    std::lock_guard<std::mutex> lock(mutex);
+    if (counter == 0) {
+        if (debug_enable) {
+            std::cerr << "Attempt to decrement when counter is zero." << std::endl;
+        }
+        throw std::underflow_error("Counter cannot be negative.");
+    }
+    --counter;
+    if (debug_enable) {
+        std::cerr << "Counter decremented to: " << counter << std::endl;
     }
 }
 
 int SafeCounter::getValue() const {
-    std::lock_guard<std::mutex> lock(mtx_);
-    debugPrint("Counter value retrieved: " + std::to_string(counter_));
-    return counter_;
+    std::lock_guard<std::mutex> lock(mutex);
+    if (debug_enable) {
+        std::cerr << "Counter value retrieved: " << counter << std::endl;
+    }
+    return counter;
 }
 
 void SafeCounter::setDebug(bool enable) {
-    std::lock_guard<std::mutex> lock(mtx_);
-    debug_enable_ = enable;
-    debugPrint("Debug mode " + std::string(enable ? "enabled" : "disabled"));
+    debug_enable = enable;
 }
 
-void SafeCounter::debugPrint(const std::string& message) const {
-    if (debug_enable_) {
-        std::cerr << "[DEBUG] " << message << std::endl;
+// Uncomment the following main function to test the SafeCounter class.
+/*
+int main() {
+    SafeCounter counter;
+    counter.setDebug(true);
+
+    try {
+        counter.increment();
+        std::cout << "Counter Value: " << counter.getValue() << std::endl;
+        counter.decrement();
+        std::cout << "Counter Value: " << counter.getValue() << std::endl;
+        counter.decrement(); // This will throw an exception
+    } catch (const std::exception& e) {
+        std::cerr << "Exception: " << e.what() << std::endl;
     }
+
+    return 0;
 }
+*/

@@ -1,42 +1,37 @@
-// TOKENS: 1590 (of:8000) = 692 + 898(prompt+return) -- MODEL: gpt-4o 
+// TOKENS: 1969 (of:8000) = 770 + 1199(prompt+return) -- MODEL: gpt-4o 
 // policy: ./ai_sw_workflow/policy/policy_c++20.yaml 
 // code: lance/lance_code.cpp 
 // dest: lance/lance_code.cpp 
 /**
  * @file lance_code.hpp
- * @brief Header file for clustering connected components in a 2D grid.
+ * @brief Header file for clustering algorithm.
  * 
- * This file contains the declarations for functions and types used to identify clusters
- * of connected '1's in a 2D grid. The approach uses Depth-First Search (DFS) to explore
- * connected components, considering vertical, horizontal, and diagonal connections.
+ * This file contains the declarations for the `clustering` function and associated helper functions.
+ * It is designed to identify clusters of connected '1's in a 2D grid using a depth-first search (DFS) approach.
  * 
- * Date: 2023-10-05
+ * Date: 2025-01-02
  */
 
-#pragma once
+#ifndef LANCE_CODE_HPP
+#define LANCE_CODE_HPP
 
 #include <vector>
 #include <utility>
+#include <string>
 
-using Grid = std::vector<std::vector<char>>;
-using Cluster = std::vector<std::pair<int, int>>;
-using Clusters = std::vector<Cluster>;
+// Global debug flag
+inline bool debug_enable = false;
 
-/**
- * @brief Identifies clusters of connected '1's in a 2D grid.
- * 
- * @param grid A 2D grid of characters ('1' or '0').
- * @return A list of clusters, where each cluster is a list of (x, y) coordinates.
- */
-Clusters clustring(const Grid& grid);
+// Function to print debug information
+void debug_print(const std::string& message);
 
-/**
- * @brief Helper function to perform DFS and find all connected components.
- * 
- * @param grid The 2D grid.
- * @param x The current x-coordinate.
- * @param y The current y-coordinate.
- * @param visited A 2D grid to track visited cells.
- * @param cluster The current cluster being explored.
- */
-void dfs(const Grid& grid, int x, int y, std::vector<std::vector<bool>>& visited, Cluster& cluster);
+// Check if a given cell (x, y) is within the grid boundaries and is a '1'
+bool is_valid(int x, int y, const std::vector<std::vector<char>>& grid, std::vector<std::vector<bool>>& visited);
+
+// Perform DFS to find all connected '1's starting from (x, y)
+void dfs(int x, int y, const std::vector<std::vector<char>>& grid, std::vector<std::vector<bool>>& visited, std::vector<std::pair<int, int>>& cluster);
+
+// Main function to find clusters in the grid
+std::vector<std::vector<std::pair<int, int>>> clustering(const std::vector<std::vector<char>>& grid);
+
+#endif // LANCE_CODE_HPP
